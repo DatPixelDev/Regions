@@ -1,0 +1,73 @@
+package me.pixel.regions;
+
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerMoveEvent;
+
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * iPixelate Development 2015 (c)
+ * if you wish to use this code please do NOT delete this text
+ */
+public class MoveListener implements Listener {
+
+    private static Map<String, String> lastRegion = new HashMap<>();
+
+    @EventHandler
+    public void onMove(PlayerMoveEvent e) {
+
+        Player p = e.getPlayer();
+        Location to = e.getTo();
+
+        if (!lastRegion.containsKey(p.getName())){
+            lastRegion.put(p.getName(), null);
+        }
+
+        Region rg = Regions.getRegionHere(to);
+
+        if(rg!=null){
+
+            String name = rg.getName();
+            String lastName = lastRegion.get(p.getName());
+
+                if(lastName==null||!name.equals(name)){
+
+                    lastRegion.put(p.getName(), name);
+
+                    if(rg.getEntryMessage()!=null){
+                        p.sendMessage("§c§l*** §6" + rg.getEntryMessage() + " §c§l***");
+                    }
+                    else {
+                        p.sendMessage("§c§l*** §eEntering §4§lADMIN §eClaimed Zone §c§l***");
+                    }
+                }
+           }
+        else {
+            String lastName = lastRegion.get(p.getName());
+            if(lastName!=null){
+
+                Region r = Regions.getRegion(lastName);
+                if (r.getLeaveMessage()!=null){
+                    p.sendMessage("§c§l*** §6" + r.getLeaveMessage() + " §c§l***");
+                }
+                else {
+                    p.sendMessage("§c§l*** §eLeaving §4§lADMIN §eClaimed Zone §c§l***");
+                }
+
+                lastRegion.put(p.getName(), null);
+            }
+        }
+      }
+
+    public static Map<String, String> getLastRegion() {
+        return lastRegion;
+    }
+
+    public static void setLastRegion(Map<String, String> lastRegion) {
+        MoveListener.lastRegion = lastRegion;
+    }
+}
