@@ -1,0 +1,276 @@
+package me.pixel.regions;
+
+import org.bukkit.Material;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+
+import java.util.List;
+
+/**
+ * iPixelate Development 2015 (c)
+ */
+public class RegionCommand implements CommandExecutor {
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
+
+        if(args.length == 0){
+        sender.sendMessage("§c§lZonedRegion Help");
+            sender.sendMessage("§7> §e/rg create §6<name>");
+            sender.sendMessage("§7> §e/rg list");
+            sender.sendMessage("§7> §e/rg tp §6<name>");
+            sender.sendMessage("§7> §e/rg delete §6<name>");
+            sender.sendMessage("§7> §e/rg wand");
+            sender.sendMessage("§7> §e/rg setentry §6<name> <message>");
+            sender.sendMessage("§7> §e/rg setleave §6<name> <message>");
+            sender.sendMessage("§7> §e/rg removemessages");
+
+        }
+        else {
+            String cmd = args[0];
+
+            if(cmd.equalsIgnoreCase("create")){
+
+                if(sender.hasPermission("region.create")){
+
+                    if(args.length == 2) {
+                        String name = args[1];
+
+                        Region rg = Regions.getRegion(name);
+                        if(rg==null)
+                        {
+                          if(Regions.getWandStorage().containsKey(sender.getName())){
+                            WandPoints wand = Regions.getWandStorage().get(sender.getName());
+                              if(wand.getP1()!=null&&wand.getP2()!=null){
+
+                                  if(wand.getP1().getWorld().getName().equals(wand.getP2().getWorld().getName())){
+                                      Region myregion = new Region(name, wand.getP1(), wand.getP2(), sender.getName());
+                                      Regions.getRegions().add(myregion);
+
+                                      sender.sendMessage("§c§lRegions> §aRegion successfully created.");
+
+                                  }
+                                  else {
+                                      sender.sendMessage("§c§lRegions> §cRegion points must be in the same world.");
+                                  }
+
+                                  return true;
+                              }
+                          }
+                            sender.sendMessage("§c§lRegions> §cPlease define a region with /rg wand");
+                        }
+                        else {
+                            sender.sendMessage("§c§lRegions> §cThis region already exists.");
+                        }
+
+                    }
+                    else{
+                        sender.sendMessage("§c§lRegions> §cPlease supply a region to delete.");
+                    }
+
+                }
+                else {
+                    sender.sendMessage("§c§lRegions> §cYou must be permission rank §4§lADMIN §cor higher to use this.");
+                }
+            }
+            else if (cmd.equalsIgnoreCase("setleave")){
+
+                if(sender.hasPermission("region.setleave")){
+
+                    if(args.length >= 3) {
+                        String name = args[1];
+
+                        Region rg = Regions.getRegion(name);
+                        if(rg!=null)
+                        {
+                            String msg = "";
+                            for (int i = 2; i < args.length; i++){
+                                msg=msg+" "+args[i];
+                            }
+                            msg=msg.substring(1);
+
+                            rg.setLeaveMessage(msg);
+                            sender.sendMessage("§c§lRegions> §7The leave message has been set to: §e" + msg);
+
+
+                        }
+                        else {
+                            sender.sendMessage("§c§lRegions> §cCould not find region named \"" + name +  "\"!");
+                        }
+
+                    }
+                    else{
+                        sender.sendMessage("§c§lRegions> §cPlease supply a region to delete.");
+                    }
+
+                }
+                else {
+                    sender.sendMessage("§c§lRegions> §cYou must be permission rank §4§lADMIN §cor higher to use this.");
+                }
+            }
+            else if (cmd.equalsIgnoreCase("setentry")){
+
+                if(sender.hasPermission("region.setentry")){
+
+                    if(args.length >= 3) {
+                        String name = args[1];
+
+                        Region rg = Regions.getRegion(name);
+                        if(rg!=null)
+                        {
+                            String msg = "";
+                            for (int i = 2; i < args.length; i++){
+                                msg=msg+" "+args[i];
+                            }
+                            msg=msg.substring(1);
+
+                            rg.setEntryMessage(msg);
+                            sender.sendMessage("§c§lRegions> §7The entry message has been set to: §e" + msg);
+
+
+                        }
+                        else {
+                            sender.sendMessage("§c§lRegions> §cCould not find region named \"" + name +  "\"!");
+                        }
+
+                    }
+                    else{
+                        sender.sendMessage("§c§lRegions> §cPlease supply a region to delete.");
+                    }
+
+                }
+                else {
+                    sender.sendMessage("§c§lRegions> §cYou must be permission rank §4§lADMIN §cor higher to use this.");
+                }
+            }
+            else if (cmd.equalsIgnoreCase("removemessages")){
+
+                if(sender.hasPermission("region.removemessages")){
+
+                    if(args.length == 2) {
+                        String name = args[1];
+
+                        Region rg = Regions.getRegion(name);
+                        if(rg!=null)
+                        {
+                           rg.setEntryMessage(null);
+                            rg.setLeaveMessage(null);
+
+                            sender.sendMessage("§c§lRegions> §aMessages have been cleared for this region.");
+                        }
+                        else {
+                            sender.sendMessage("§c§lRegions> §cCould not find region named \"" + name +  "\"!");
+                        }
+
+                    }
+                    else{
+                        sender.sendMessage("§c§lRegions> §cPlease supply a region to delete.");
+                    }
+
+                }
+                else {
+                    sender.sendMessage("§c§lRegions> §cYou must be permission rank §4§lADMIN §cor higher to use this.");
+                }
+            }
+            else if (cmd.equalsIgnoreCase("wand")){
+
+                if(sender.hasPermission("region.wand")){
+                        if((sender instanceof Player)){
+
+                            Player p = (Player) sender;
+
+                            ItemStack wand = new ItemStack(Material.GOLD_AXE, 1);
+                            ItemMeta meta = wand.getItemMeta();
+                            meta.setDisplayName("§c§lRegion Wand");
+                            wand.setItemMeta(meta);
+                            p.getInventory().addItem(wand);
+                            sender.sendMessage("§c§lRegions> §7You recieved a §c§lRegion Wand§7.");
+
+
+                        }
+
+                }
+                else {
+                    sender.sendMessage("§c§lRegions> §cYou must be permission rank §4§lADMIN §cor higher to use this.");
+                }
+            }
+            else if (cmd.equalsIgnoreCase("tp")){
+
+                if(sender.hasPermission("region.tp")){
+
+                    if(args.length == 2) {
+                        String name = args[1];
+
+                        Region rg = Regions.getRegion(name);
+                        if(rg!=null)
+                        {
+                            if((sender instanceof Player)){
+                                Player p = (Player) sender;
+
+                                p.teleport(rg.getP1());
+                                p.sendMessage("§c§lRegions> §7You have been Teleported to §e" + rg.getName() + "§7.");
+                            }
+                        }
+                        else {
+                            sender.sendMessage("§c§lRegions> §cCould not find region named \"" + name +  "\"!");
+                        }
+
+                    }
+                    else{
+                        sender.sendMessage("§c§lRegions> §cPlease supply a region to delete.");
+                    }
+
+                }
+                else {
+                    sender.sendMessage("§c§lRegions> §cYou must be permission rank §4§lADMIN §cor higher to use this.");
+                }
+            }
+            else if (cmd.equalsIgnoreCase("list")){
+
+                List<Region> list = Regions.getRegions();
+
+                if(list.size() > 0){
+
+                    sender.sendMessage("§c§lLoaded regions §8(§b" + list.size() + "§8): §e" + list.toString());
+                }
+                else {
+                    sender.sendMessage("§c§lNo regions defined.");
+                }
+            }
+            else if (cmd.equalsIgnoreCase("delete")){
+
+            if(sender.hasPermission("region.delete")){
+
+                if(args.length == 2) {
+                    String name = args[1];
+
+                    Region rg = Regions.getRegion(name);
+                    if(rg!=null)
+                    {
+                        Regions.getRegions().remove(rg);
+                        sender.sendMessage("§c§lRegions> §aRegion successfully deleted.");
+                    }
+                    else {
+                        sender.sendMessage("§c§lRegions> §cCould not find region named \"" + name +  "\"!");
+                    }
+
+                }
+                else{
+                    sender.sendMessage("§c§lRegions> §cPlease supply a region to delete.");
+                }
+
+            }
+            else {
+                sender.sendMessage("§c§lRegions> §cYou must be permission rank §4§lADMIN §cor higher to use this.");
+               }
+            }
+            else {
+                sender.sendMessage("§cUnknown command. §e/rg §cfor help.");
+            }
+        }
+        return true;
+    }
+}
