@@ -1,0 +1,50 @@
+package me.pixel.regions;
+
+import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemStack;
+
+/**
+ * iPixelate Development 2015 (c)
+ */
+public class InteractListener implements Listener {
+
+    @EventHandler
+    public void onInteract(PlayerInteractEvent e){
+
+        Player p = e.getPlayer();
+
+        ItemStack hand = p.getItemInHand();
+        if(hand!=null&&hand.getType()== Material.GOLD_AXE
+                &&p.hasPermission("region.create")){
+
+            if(e.getAction()== Action.LEFT_CLICK_BLOCK){
+                Block b = e.getClickedBlock();
+
+                if(!Regions.getWandStorage().containsKey(p.getName())){
+                    Regions.getWandStorage().put(p.getName(), new WandPoints(null, null));
+                }
+
+                Regions.getWandStorage().get(p.getName()).setP1(b.getLocation());
+                e.setCancelled(true);
+                p.sendMessage("§c§lRegions> §aPosition 1 set.");
+            }
+            else if (e.getAction()== Action.RIGHT_CLICK_BLOCK) {
+                Block b = e.getClickedBlock();
+
+                if(!Regions.getWandStorage().containsKey(p.getName())){
+                    Regions.getWandStorage().put(p.getName(), new WandPoints(null, null));
+                }
+
+                Regions.getWandStorage().get(p.getName()).setP2(b.getLocation());
+                e.setCancelled(true);
+                p.sendMessage("§c§lRegions> §aPosition 2 set.");
+            }
+        }
+    }
+}
